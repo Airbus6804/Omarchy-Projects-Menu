@@ -75,4 +75,4 @@ Contributions are welcome! If you have ideas for improvements or bug fixes, feel
 
 ## Credits
 
-Special thanks to [tomkyriacou64](https://github.com/tomkyriacou64) for dropping nodejs support and extending this to support multiple IDEs.
+Special thanks to [tomkyriacou64](https://github.com/tomkyriacou64) for dropping nodejs dependency and extending this to support multiple IDEs.
