@@ -165,14 +165,21 @@ browse_directory() {
         IFS=$'\n' sorted_dirs=($(printf '%s\n' "${dirs[@]}" | sort))
         items+=("${sorted_dirs[@]}")
     fi
-    
-    # Add separator before navigation options (visual only, non-functional)
-    items+=("────────────────────────────")
-    
+
     # Add navigation options at the end
-    [[ "$current_dir" != "/" ]] && items+=("⬆️  Go up")
     [[ "$current_dir" != "$home" ]] && items+=("🏠 Go to home")
-    [[ -d "${home}/Projects" ]] && [[ "$current_dir" != "${home}/Projects" ]] && items+=("📂 Go to Projects")
+
+    # Check for projects directory (try Work/Projects first, then Projects)
+    local projects_dir=""
+    if [[ -d "${home}/Work/Projects" ]]; then
+        projects_dir="${home}/Work/Projects"
+    elif [[ -d "${home}/work/Projects" ]]; then
+        projects_dir="${home}/work/Projects"
+    elif [[ -d "${home}/Projects" ]]; then
+        projects_dir="${home}/Projects"
+    fi
+    [[ -n "$projects_dir" ]] && [[ "$current_dir" != "$projects_dir" ]] && items+=("📂 Go to Projects")
+
     [[ -d "${home}/Documents" ]] && [[ "$current_dir" != "${home}/Documents" ]] && items+=("📄 Go to Documents")
     
     # Show menu with current path (shortened if in home)
@@ -182,25 +189,25 @@ browse_directory() {
     
     # Handle special options
     case "$selected" in
-        "────────────────────────────")
-            # Separator selected - just refresh the menu (non-selectable, visual only)
-            browse_directory "$current_dir"
-            return $?
-            ;;
         "✓ Select this folder")
             echo "$current_dir"
             return 0
-            ;;
-        "⬆️  Go up")
-            browse_directory "$(dirname "$current_dir")"
-            return $?
             ;;
         "🏠 Go to home")
             browse_directory "$home"
             return $?
             ;;
         "📂 Go to Projects")
-            browse_directory "${home}/Projects"
+            # Determine the actual projects directory
+            local projects_dir=""
+            if [[ -d "${home}/Work/Projects" ]]; then
+                projects_dir="${home}/Work/Projects"
+            elif [[ -d "${home}/work/Projects" ]]; then
+                projects_dir="${home}/work/Projects"
+            elif [[ -d "${home}/Projects" ]]; then
+                projects_dir="${home}/Projects"
+            fi
+            browse_directory "$projects_dir"
             return $?
             ;;
         "📄 Go to Documents")
@@ -231,22 +238,31 @@ browse_directory() {
 
 pick_folder() {
     local home="${HOME}"
-    local start_dir="$home"
-    
-    # Try to start from a common project location if it exists
-    [[ -d "${home}/Projects" ]] && start_dir="${home}/Projects"
-    [[ -d "${home}/Documents" ]] && start_dir="${home}/Documents"
-    
-    browse_directory "$start_dir"
+    local projects_dir="${home}/Work/Projects"
+
+    [[ ! -d "$projects_dir" ]] && projects_dir="${home}/work/Projects"
+    [[ ! -d "$projects_dir" ]] && projects_dir="${home}/Projects"
+    [[ ! -d "$projects_dir" ]] && { echo "Projects directory not found" >&2; return 1; }
+
+    local folders=()
+    shopt -s nullglob
+    for dir in "$projects_dir"/*; do
+        [[ -d "$dir" ]] && folders+=("$(basename "$dir")")
+    done
+    shopt -u nullglob
+
+    [[ ${#folders[@]} -eq 0 ]] && { echo "No folders found" >&2; return 1; }
+
+    local selected=$(printf '%s\n' "${folders[@]}" | sort | walker --dmenu -p "Select folder:")
+    [[ -z "$selected" ]] && return 1
+
+    echo "${projects_dir}/${selected}"
 }
 
 open_existing_project() {
     local folder_path
     folder_path=$(pick_folder) || exit 0
-    
-    local editor_cmd
-    editor_cmd=$(select_editor "") || exit 0
-    
-    "$editor_cmd" "$folder_path"
+
+    xdg-open "$folder_path"
 }
 

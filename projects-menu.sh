@@ -121,18 +121,19 @@ get_tabs() {
 get_projects() {
     local filter="${1,,}"
     [[ -z "$filter" ]] && filter="all"
-    
+
     all_workspaces=()
+
     while IFS='|' read -r name config_path cmd editor_type; do
         [[ "$filter" != "all" ]] && \
             [[ ! "${name,,}" == *"$filter"* ]] && \
             [[ ! "${cmd,,}" == *"$filter"* ]] && continue
-        
+
         while IFS= read -r workspace; do
             [[ -n "$workspace" ]] && all_workspaces+=("$workspace")
         done < <(get_workspaces "$name" "$config_path" "$cmd" "$editor_type")
     done < <(get_installed_editors)
-    
+
     printf '%s\n' "${all_workspaces[@]}" | \
         awk -F'|' '{
             split($3, dt, "T")
@@ -142,12 +143,7 @@ get_projects() {
         }' | \
         sort -t'|' -k1 -r | \
         sed 's/^[^|]*|//' | \
-        awk -F'|' -v filter="$filter" '{
-            if (filter == "all")
-                print $1 " (" $4 ")|" $2 "|" $3 "|" $4 "|" $5
-            else
-                print $1 "|" $2 "|" $3 "|" $4 "|" $5
-        }'
+        awk -F'|' '{print $1 "|" $2 "|" $3 "|" $4 "|" $5}'
 }
 
 # Source project creation functionality
@@ -192,6 +188,8 @@ if [[ -z "$projects" ]]; then
     exit 0
 fi
 
+projects=$(echo "$projects"; echo "─────────────────────────────|separator||separator|"; echo "Create New Project|create||create|"; echo "Open Folder|open||open|")
+
 case "$EDITOR_FILTER" in
     all|"") prompt="All Projects…" ;;
     cursor) prompt="Cursor Projects…" ;;
@@ -204,6 +202,20 @@ esac
 selected=$(echo "$projects" | cut -d'|' -f1 | walker --dmenu -p "$prompt")
 [[ -z "$selected" ]] && exit 0
 
+# Skip separator
+[[ "$selected" == "─────────────────────────────" ]] && exit 0
+
+if [[ "$selected" == "Create New Project" ]]; then
+    all_projects=$(get_projects "all")
+    create_new_project "" "$all_projects"
+    exit 0
+fi
+
+if [[ "$selected" == "Open Folder" ]]; then
+    open_existing_project
+    exit 0
+fi
+
 project_line=$(echo "$projects" | awk -F'|' -v sel="$selected" '$1 == sel')
 [[ -z "$project_line" ]] && exit 0
 
@@ -211,8 +223,18 @@ folder=$(echo "$project_line" | cut -d'|' -f2)
 cmd=$(echo "$project_line" | cut -d'|' -f5)
 
 if [[ -z "$cmd" ]]; then
-    echo "No launch command found for selection." >&2
-    exit 1
+    if has_command code; then
+        cmd="code"
+    elif has_command cursor; then
+        cmd="cursor"
+    elif has_command codium; then
+        cmd="codium"
+    elif has_command zeditor; then
+        cmd="zeditor"
+    else
+        cmd=$(select_editor "")
+        [[ -z "$cmd" ]] && exit 0
+    fi
 fi
 
 "$cmd" "$folder"

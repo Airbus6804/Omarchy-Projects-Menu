@@ -2,6 +2,8 @@
 
 A lightweight launcher to quickly open recent IDE projects (Cursor, VS Code, VS Code OSS, VSCodium & Zed) using a dmenu-style menu.
 
+**Fork additions:** Integrated into Walker launcher as a native module instead of separate keybinds.
+
 ## Features
 
 - Lists all your IDE workspaces sorted by **most recently used**
@@ -38,7 +40,19 @@ chmod +x ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/projects-menu.sh && \
 chmod +x ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/create-project.sh
 ```
 
-Add binds in your config:
+### Walker Integration (Recommended)
+
+Add Projects as an entry in Walker launcher:
+
+```bash
+cp ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/projects.desktop ~/.local/share/applications/
+```
+
+Now "Projects" will appear in Walker (SUPER + SPACE). Just type "Projects" and hit Enter to access all your recent projects.
+
+### Alternative: Keybind Setup
+
+Add binds in your Hyprland config:
 
 ```
 # All IDE projects (shows tabbed interface)
@@ -59,7 +73,7 @@ bindd = SUPER SHIFT, V, VS Code Projects, exec, ~/.config/hypr/scripts/Omarchy-C
 When you run the script, you'll see a menu with:
 - Your installed IDEs (with project counts)
 - **➕ Create New Project** - Create a new project directory
-- **📂 Open Project** - Browse and open any existing folder
+- **📂 Open Folder** - Open any project folder in your file manager
 
 ### Filter by specific editor
 ```bash
@@ -81,10 +95,10 @@ When you run the script, you'll see a menu with:
 - Suggests commonly used project directories based on your history
 - Creates the directory structure and opens it in your selected editor
 
-### Opening Any Folder
-- Uses a walker-based directory browser (no GUI file picker required)
-- Navigate through your filesystem to find any folder
-- Works with folders that have never been opened in an IDE before
+### Opening Folders
+- Shows a simple list of folders from your Projects directory
+- Opens selected folder in your default file manager
+- Quick access to any project folder without opening an IDE
 
 **Note:** This project uses pure bash with standard Linux utilities. No Node.js required! JSON parsing uses `jq` if available, otherwise falls back to `grep`/`sed` for simple extraction.
 
