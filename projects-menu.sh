@@ -105,16 +105,16 @@ get_installed_editors() {
 
 get_tabs() {
     all_count=0
-    editor_counts=()
     
     while IFS='|' read -r name config_path cmd editor_type; do
         count=$(get_workspaces "$name" "$config_path" "$cmd" "$editor_type" | grep -c . || echo "0")
         all_count=$((all_count + count))
-        editor_counts+=("${name}|${count}")
+        echo "${name} (${count})|${name}"
     done < <(get_installed_editors)
     
     echo "All (${all_count})|all"
-    printf '%s\n' "${editor_counts[@]}" | awk -F'|' '{print $1 " (" $2 ")|" $1}'
+    echo "───|divider"
+    echo "➕ Create New Project|create"
 }
 
 get_projects() {
@@ -149,17 +149,31 @@ get_projects() {
         }'
 }
 
+# Source project creation functionality
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "${SCRIPT_DIR}/create-project.sh"
+
 if [[ -z "$EDITOR_FILTER" ]]; then
     tabs=$(get_tabs)
-    tab_count=$(echo "$tabs" | wc -l)
+    tab_count=$(echo "$tabs" | grep -v '|divider$' | grep -v '|create$' | wc -l)
     
-    if [[ $tab_count -eq 2 ]]; then
-        EDITOR_FILTER=$(echo "$tabs" | tail -n 1 | awk -F'|' '{print $2}')
-    elif [[ $tab_count -eq 1 ]]; then
-        EDITOR_FILTER="all"
+    if [[ $tab_count -eq 1 ]]; then
+        EDITOR_FILTER=$(echo "$tabs" | grep -v '|divider$' | grep -v '|create$' | awk -F'|' '{print $2}')
     else
         selected_tab=$(echo "$tabs" | cut -d'|' -f1 | walker --dmenu -p "Select IDE…")
         [[ -z "$selected_tab" ]] && exit 0
+        
+        # Check if "Create New Project" was selected
+        if [[ "$selected_tab" == "➕ Create New Project" ]]; then
+            all_projects=$(get_projects "all")
+            create_new_project "" "$all_projects"
+            exit 0
+        fi
+        
+        # Skip divider
+        [[ "$selected_tab" == "───" ]] && exit 0
+        
+        # Match by display name and get the filter value
         EDITOR_FILTER=$(echo "$tabs" | awk -F'|' -v sel="$selected_tab" '$1 == sel {print $2; exit}')
         [[ -z "$EDITOR_FILTER" ]] && exit 0
     fi

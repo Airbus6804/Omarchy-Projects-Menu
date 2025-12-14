@@ -32,7 +32,8 @@ A lightweight launcher to quickly open recent IDE projects (Cursor, VS Code, VS 
 ```bash
 mkdir -p ~/.config/hypr/scripts && \
 git clone https://github.com/Airbus6804/Omarchy-Cursor-Projects-Menu.git ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu && \
-chmod +x ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/projects-menu.sh
+chmod +x ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/projects-menu.sh && \
+chmod +x ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/create-project.sh
 ```
 
 Add binds in your config:
