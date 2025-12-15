@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Projects
+Comment=Quick access to recent IDE projects
+Exec=/home/YOUR_USERNAME/.config/hypr/scripts/Omarchy-Code-Projects-Menu/projects-menu.sh
+Icon=folder-code
+Type=Application
+Categories=Development;Utility;
+Terminal=false
+NoDisplay=false

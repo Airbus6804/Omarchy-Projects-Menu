@@ -38,7 +38,21 @@ chmod +x ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/projects-menu.sh && \
 chmod +x ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/create-project.sh
 ```
 
-Add binds in your config:
+### Walker Integration (Recommended)
+
+Add Projects as an entry in Walker launcher:
+
+1. Edit `projects.desktop` and replace `YOUR_USERNAME` with your actual username
+2. Copy the desktop file:
+```bash
+cp ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/projects.desktop ~/.local/share/applications/
+```
+
+Now "Projects" will appear in Walker. Just type "Projects" and hit Enter to access all your recent projects.
+
+### Alternative: Keybind Setup
+
+Add binds in your Hyprland config:
 
 ```
 # All IDE projects (shows tabbed interface)
