@@ -44,8 +44,6 @@ chmod +x ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/create-project.sh
 
 Add Projects as an entry in Walker launcher:
 
-1. Edit `projects.desktop` and replace `YOUR_USERNAME` with your actual username
-2. Copy the desktop file:
 ```bash
 cp ~/.config/hypr/scripts/Omarchy-Code-Projects-Menu/projects.desktop ~/.local/share/applications/
 ```
@@ -110,4 +108,4 @@ Contributions are welcome! If you have ideas for improvements or bug fixes, feel
 
 ## Credits
 
-Special thanks to [tomkyriacou64](https://github.com/tomkyriacou64) for dropping nodejs dependency, create add project functionality and extending this to support multiple IDEs.
+Special thanks to [tomkyriacou64](https://github.com/tomkyriacou64) for dropping nodejs dependency, create add project functionality and extending this to support multiple IDEs, and to [xRipzch](https://github.com/xRipzch) for including the menu inside the applications menu for Omarchy
